@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libpq-dev \
+    default-mysql-client \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath
 
 # Instalar Composer
@@ -27,11 +27,12 @@ RUN composer install --no-dev --optimize-autoloader
 # Permisos de Laravel
 RUN chmod -R 775 storage bootstrap/cache
 
-# Exponer el puerto que usa Render
+# Exponer el puerto
 EXPOSE 8000
 
-# Comando de arranque
-CMD php artisan config:cache && \
+# Comando de arranque - limpia config primero para respetar variables de Render
+CMD php artisan config:clear && \
+    php artisan config:cache && \
     php artisan route:cache && \
     php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=8000
